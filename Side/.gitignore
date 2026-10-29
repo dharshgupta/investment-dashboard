@@ -1,0 +1,25 @@
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Project
+node_modules/
+dist/
+build/
+
+# Secrets
+.env
+.env.local
+config.local.js
+
+# Temp files
+*.tmp
+*.bak

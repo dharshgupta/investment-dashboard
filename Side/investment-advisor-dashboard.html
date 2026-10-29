@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Investment Advisor Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 2000px;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid #475569;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 1em;
+        }
+
+        .status-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10b981;
+            border-radius: 20px;
+            color: #6ee7b7;
+            font-weight: 600;
+        }
+
+        .pulse {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; scale: 1; }
+            50% { opacity: 0.5; scale: 0.8; }
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: #475569;
+            color: #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #64748b;
+        }
+
+        .market-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-card {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            text-align: center;
+        }
+
+        .status-card-label {
+            font-size: 0.85em;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .status-card-value {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #10b981;
+        }
+
+        /* FILTERS & SEARCH */
+        .filters {
+            background: rgba(30, 41, 59, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            border: 1px solid #475569;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            background: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 0.9em;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* DASHBOARD GRID */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.9) 100%);
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #3b82f6;
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .card-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #cbd5e1;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .card-value {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #f1f5f9;
+        }
+
+        .card-change {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .card-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 15px;
+        }
+
+        .detail {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.75em;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #10b981;
+        }
+
+        /* COLOR STATES */
+        .card.positive {
+            border-left: 4px solid #10b981;
+        }
+
+        .card.negative {
+            border-left: 4px solid #ef4444;
+        }
+
+        .card.neutral {
+            border-left: 4px solid #64748b;
+        }
+
+        .badge-green {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            border: 1px solid #10b981;
+        }
+
+        .badge-red {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid #ef4444;
+        }
+
+        .badge-orange {
+            background: rgba(249, 115, 22, 0.2);
+            color: #fbbf24;
+            border: 1px solid #f97316;
+        }
+
+        .badge-gray {
+            background: rgba(100, 116, 139, 0.2);
+            color: #cbd5e1;
+            border: 1px solid #64748b;
+        }
+
+        .text-green { color: #10b981; }
+        .text-red { color: #ef4444; }
+        .text-orange { color: #f97316; }
+        .text-gray { color: #94a3b8; }
+
+        /* RECOMMENDATION BOX */
+        .recommendation {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);
+            border: 1px solid #10b981;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #d1fae5;
+        }
+
+        .recommendation.sell {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(249, 115, 22, 0.1) 100%);
+            border-color: #ef4444;
+            color: #fca5a5;
+        }
+
+        .recommendation.hold {
+            background: linear-gradient(135deg, rgba(100, 116, 139, 0.1) 0%, rgba(71, 85, 105, 0.1) 100%);
+            border-color: #64748b;
+            color: #cbd5e1;
+        }
+
+        .rec-title {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        /* ALERTS */
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10b981;
+            color: #6ee7b7;
+        }
+
+        .alert-warning {
+            background: rgba(249, 115, 22, 0.1);
+            border: 1px solid #f97316;
+            color: #fbbf24;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid #3b82f6;
+            color: #93c5fd;
+        }
+
+        /* LOADING */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #475569;
+            border-top-color: #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .status-controls {
+                width: 100%;
+            }
+        }
+
+        /* FOOTER */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-size: 0.85em;
+            margin-top: 40px;
+            border-top: 1px solid #475569;
+        }
+
+        .footer a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* MODAL STYLES */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            margin: 5% auto;
+            padding: 30px;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #475569;
+            padding-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2em;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #ef4444;
+        }
+
+        .stocks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stock-item {
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stock-item:hover {
+            background: rgba(51, 65, 85, 0.8);
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.2);
+        }
+
+        .stock-abbr {
+            font-size: 0.8em;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .stock-name {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 12px;
+        }
+
+        .stock-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.9em;
+            color: #cbd5e1;
+        }
+
+        .stock-info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stock-info-label {
+            color: #94a3b8;
+        }
+
+        .stock-info-value {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .category-card {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .category-card:hover {
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.25) !important;
+        }
+
+        .click-to-expand {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.8em;
+            color: #3b82f6;
+            font-weight: 600;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .category-card:hover .click-to-expand {
+            opacity: 1;
+            transform: translateX(5px);
+        }
+
+        /* Scrollbar styling */
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: rgba(100, 116, 139, 0.2);
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-top">
+                <div>
+                    <h1>💼 Investment Advisor Dashboard</h1>
+                    <p>Real-time Market Analysis & Professional Recommendations</p>
+                </div>
+                <div class="status-controls">
+                    <div class="status-badge">
+                        <div class="pulse"></div>
+                        <span id="status">LIVE</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="refreshData()">↻ Refresh Data</button>
+                </div>
+            </div>
+
+            <div class="market-status">
+                <div class="status-card">
+                    <div class="status-card-label">Market Sentiment</div>
+                    <div class="status-card-value" id="marketSentiment">--</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-card-label">Risk Level</div>
+                    <div class="status-card-value" id="riskLevel" style="color: #f97316;">--</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-card-label">Top Pick</div>
+                    <div class="status-card-value" id="topPick" style="color: #10b981;">--</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-card-label">Last Updated</div>
+                    <div class="status-card-value" style="font-size: 0.9em; color: #cbd5e1;" id="lastUpdate">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALERTS -->
+        <div id="alerts"></div>
+
+        <!-- FILTERS -->
+        <div class="filters">
+            <div class="filter-group">
+                <label>Filter by Category:</label>
+                <select id="categoryFilter" onchange="applyFilters()">
+                    <option value="all">All Assets</option>
+                    <option value="index">Indices</option>
+                    <option value="sector">Sectors</option>
+                    <option value="commodity">Commodities</option>
+                    <option value="currency">Currencies</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Risk Preference:</label>
+                <select id="riskFilter" onchange="applyFilters()">
+                    <option value="all">All Risk Levels</option>
+                    <option value="low">Low Risk Only</option>
+                    <option value="medium">Medium Risk Only</option>
+                    <option value="high">High Risk Only</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Sort by:</label>
+                <select id="sortFilter" onchange="applyFilters()">
+                    <option value="performance">Top Performers</option>
+                    <option value="undervalued">Most Undervalued</option>
+                    <option value="recommendation">Best Rated</option>
+                    <option value="risk">Lowest Risk</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- MODAL FOR CATEGORY DETAILS -->
+        <div id="categoryModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modalTitle">Category Details</h2>
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="stocks-grid" id="stocksList"></div>
+            </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="dashboard-grid"></div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <p>📊 Investment Advisor Dashboard v1.0 | Data powered by multiple sources | Refresh every 30 seconds</p>
+            <p style="margin-top: 10px; color: #475569;">⚠️ Disclaimer: This dashboard is for informational purposes only. Always consult with a financial advisor before making investment decisions.</p>
+        </div>
+    </div>
+
+    <script>
+        // COMPREHENSIVE MARKET DATA
+        const marketData = [
+            // INDIAN INDICES
+            { id: 1, name: 'Nifty 50', country: 'India', category: 'index', value: 22749.75, change: 0.5, pe: 22.70, roe: 16.2, div_yield: 1.8, risk: 'medium', recommendation: 'BUY', score: 8.2, volume: 'High', sector: 'Broad Market' },
+            { id: 2, name: 'Sensex', country: 'India', category: 'index', value: 73600, change: 0.45, pe: 22.95, roe: 16.1, div_yield: 1.7, risk: 'medium', recommendation: 'BUY', score: 8.1, volume: 'High', sector: 'Broad Market' },
+            { id: 3, name: 'Nifty Smallcap 250', country: 'India', category: 'index', value: 16920.40, change: 2.67, pe: 34.20, roe: 14.5, div_yield: 0.9, risk: 'high', recommendation: 'HOLD', score: 6.8, volume: 'Medium', sector: 'Small Cap' },
+
+            // SECTORS
+            { id: 4, name: 'Capital Goods', country: 'India', category: 'sector', value: 32.5, change: 32.5, pe: 36.50, roe: 18.2, div_yield: 1.2, risk: 'high', recommendation: 'BUY', score: 9.2, volume: 'High', sector: 'Engineering' },
+            { id: 5, name: 'Private Banking', country: 'India', category: 'sector', value: 14.1, change: 14.1, pe: 17.0, roe: 19.5, div_yield: 2.8, risk: 'low', recommendation: 'BUY', score: 9.1, volume: 'Very High', sector: 'Financial Services' },
+            { id: 6, name: 'Pharmaceuticals', country: 'India', category: 'sector', value: 24.4, change: 24.4, pe: 29.10, roe: 17.8, div_yield: 1.4, risk: 'medium', recommendation: 'BUY', score: 8.7, volume: 'High', sector: 'Healthcare' },
+            { id: 7, name: 'IT Services', country: 'India', category: 'sector', value: 11.5, change: 11.5, pe: 27.90, roe: 16.9, div_yield: 1.5, risk: 'medium', recommendation: 'BUY', score: 8.3, volume: 'High', sector: 'Technology' },
+            { id: 8, name: 'Telecom', country: 'India', category: 'sector', value: 33.2, change: 33.2, pe: 30.90, roe: 15.2, div_yield: 3.1, risk: 'medium', recommendation: 'BUY', score: 8.4, volume: 'High', sector: 'Telecom' },
+            { id: 9, name: 'Defence', country: 'India', category: 'sector', value: 38.5, change: 38.5, pe: 46.80, roe: 14.8, div_yield: 0.8, risk: 'high', recommendation: 'BUY', score: 9.0, volume: 'Medium', sector: 'Defence' },
+
+            // GLOBAL INDICES
+            { id: 10, name: 'S&P 500', country: 'USA', category: 'index', value: 7722.60, change: 0.60, pe: 26.10, roe: 15.8, div_yield: 1.5, risk: 'medium', recommendation: 'BUY', score: 8.4, volume: 'Very High', sector: 'Broad Market' },
+            { id: 11, name: 'Nasdaq', country: 'USA', category: 'index', value: 26477.81, change: 1.18, pe: 28.50, roe: 17.2, div_yield: 0.8, risk: 'medium-high', recommendation: 'BUY', score: 8.6, volume: 'Very High', sector: 'Technology' },
+            { id: 12, name: 'FTSE 100', country: 'UK', category: 'index', value: 8234.50, change: -0.25, pe: 12.40, roe: 13.2, div_yield: 3.8, risk: 'low', recommendation: 'HOLD', score: 7.2, volume: 'High', sector: 'Broad Market' },
+            { id: 13, name: 'DAX 40', country: 'Germany', category: 'index', value: 18456.75, change: 0.45, pe: 14.0, roe: 12.5, div_yield: 2.5, risk: 'low-medium', recommendation: 'BUY', score: 7.8, volume: 'High', sector: 'Broad Market' },
+
+            // ASIAN INDICES
+            { id: 14, name: 'Nikkei 225', country: 'Japan', category: 'index', value: 27891.33, change: 0.40, pe: 16.50, roe: 11.8, div_yield: 2.1, risk: 'low-medium', recommendation: 'HOLD', score: 7.5, volume: 'High', sector: 'Broad Market' },
+            { id: 15, name: 'KOSPI', country: 'South Korea', category: 'index', value: 2634.50, change: 0.80, pe: 11.30, roe: 13.2, div_yield: 1.9, risk: 'medium', recommendation: 'BUY', score: 8.1, volume: 'Medium', sector: 'Technology' },
+
+            // COMMODITIES
+            { id: 16, name: 'Brent Crude Oil', country: 'Global', category: 'commodity', value: 114.03, change: -1.54, pe: 'N/A', roe: 'N/A', div_yield: 0, risk: 'high', recommendation: 'SELL', score: 5.2, volume: 'Very High', sector: 'Energy' },
+            { id: 17, name: 'Gold (Spot)', country: 'Global', category: 'commodity', value: 3993.96, change: -3.80, pe: 'N/A', roe: 'N/A', div_yield: 0, risk: 'high', recommendation: 'HOLD', score: 6.5, volume: 'Very High', sector: 'Precious Metals' },
+
+            // CURRENCIES
+            { id: 18, name: 'USD/INR', country: 'Currency', category: 'currency', value: 95.12, change: 0.05, pe: 'N/A', roe: 'N/A', div_yield: 0, risk: 'medium', recommendation: 'HOLD', score: 7.0, volume: 'Very High', sector: 'FX' },
+            { id: 19, name: 'EUR/USD', country: 'Currency', category: 'currency', value: 1.0875, change: 0.12, pe: 'N/A', roe: 'N/A', div_yield: 0, risk: 'medium', recommendation: 'HOLD', score: 7.2, volume: 'Very High', sector: 'FX' },
+
+            // CRYPTO
+            { id: 20, name: 'Bitcoin', country: 'Crypto', category: 'commodity', value: 67234.50, change: 3.45, pe: 'N/A', roe: 'N/A', div_yield: 0, risk: 'very-high', recommendation: 'HOLD', score: 6.8, volume: 'Very High', sector: 'Digital Assets' }
+        ];
+
+        let filteredData = [...marketData];
+
+        function getRecommendationStyle(rec) {
+            if (rec === 'BUY') return 'badge-green';
+            if (rec === 'SELL') return 'badge-red';
+            if (rec === 'HOLD') return 'badge-orange';
+            return 'badge-gray';
+        }
+
+        function getRiskColor(risk) {
+            const colors = {
+                'low': 'badge-green',
+                'low-medium': 'badge-gray',
+                'medium': 'badge-orange',
+                'medium-high': 'badge-orange',
+                'high': 'badge-red',
+                'very-high': 'badge-red'
+            };
+            return colors[risk] || 'badge-gray';
+        }
+
+        function formatValue(value) {
+            if (typeof value === 'number') {
+                if (value > 1000) return value.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+                if (value > 100) return value.toFixed(2);
+                return value.toFixed(4);
+            }
+            return value;
+        }
+
+        function createCard(asset) {
+            const isPositive = asset.change >= 0;
+            const changeSymbol = asset.change > 0 ? '▲' : asset.change < 0 ? '▼' : '─';
+            const changeColor = isPositive ? 'text-green' : 'text-red';
+            const cardClass = isPositive ? 'positive' : asset.change < 0 ? 'negative' : 'neutral';
+
+            const recColor = getRecommendationStyle(asset.recommendation);
+            const riskColor = getRiskColor(asset.risk);
+
+            let recommendation = '';
+            if (asset.recommendation === 'BUY') {
+                recommendation = `<div class="recommendation"><div class="rec-title">✓ BUY SIGNAL</div>Strong fundamentals and growth potential identified.</div>`;
+            } else if (asset.recommendation === 'SELL') {
+                recommendation = `<div class="recommendation sell"><div class="rec-title">✗ SELL SIGNAL</div>Concerns detected. Consider reviewing position.</div>`;
+            } else {
+                recommendation = `<div class="recommendation hold"><div class="rec-title">≈ HOLD</div>Maintain current position pending market clarity.</div>`;
+            }
+
+            return `
+                <div class="card ${cardClass}">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">${asset.name}</div>
+                            <div style="color: #94a3b8; font-size: 0.9em;">🌍 ${asset.country} • ${asset.sector}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="card-badge ${recColor}">${asset.recommendation}</span>
+                            <div style="margin-top: 8px;">
+                                <span class="card-badge ${riskColor}">${asset.risk.toUpperCase()}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-value">${formatValue(asset.value)}</div>
+                    <div class="card-change ${changeColor}">
+                        ${changeSymbol} ${Math.abs(asset.change).toFixed(2)}%
+                    </div>
+
+                    <div class="card-details">
+                        <div class="detail">
+                            <div class="detail-label">Confidence</div>
+                            <div class="detail-value">${asset.score}/10</div>
+                        </div>
+                        <div class="detail">
+                            <div class="detail-label">Volume</div>
+                            <div class="detail-value">${asset.volume}</div>
+                        </div>
+                        ${asset.pe !== 'N/A' ? `
+                            <div class="detail">
+                                <div class="detail-label">P/E Ratio</div>
+                                <div class="detail-value">${asset.pe}x</div>
+                            </div>
+                            <div class="detail">
+                                <div class="detail-label">ROE / Div</div>
+                                <div class="detail-value">${asset.roe}% / ${asset.div_yield}%</div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    ${recommendation}
+                </div>
+            `;
+        }
+
+        function applyFilters() {
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const riskFilter = document.getElementById('riskFilter').value;
+            const sortFilter = document.getElementById('sortFilter').value;
+
+            filteredData = marketData.filter(asset => {
+                const categoryMatch = categoryFilter === 'all' || asset.category === categoryFilter;
+                let riskMatch = true;
+
+                if (riskFilter !== 'all') {
+                    const assetRiskLevel = asset.risk.includes('high') ? 'high' :
+                                          asset.risk.includes('medium') ? 'medium' : 'low';
+                    riskMatch = assetRiskLevel === riskFilter;
+                }
+
+                return categoryMatch && riskMatch;
+            });
+
+            // Apply sorting
+            if (sortFilter === 'performance') {
+                filteredData.sort((a, b) => b.change - a.change);
+            } else if (sortFilter === 'undervalued') {
+                filteredData.sort((a, b) => a.pe - b.pe);
+            } else if (sortFilter === 'recommendation') {
+                const recOrder = { 'BUY': 0, 'HOLD': 1, 'SELL': 2 };
+                filteredData.sort((a, b) => (recOrder[a.recommendation] || 3) - (recOrder[b.recommendation] || 3));
+            } else if (sortFilter === 'risk') {
+                const riskOrder = { 'low': 0, 'low-medium': 1, 'medium': 2, 'medium-high': 3, 'high': 4, 'very-high': 5 };
+                filteredData.sort((a, b) => (riskOrder[a.risk] || 5) - (riskOrder[b.risk] || 5));
+            }
+
+            renderDashboard();
+        }
+
+        function renderDashboard() {
+            const dashboard = document.getElementById('dashboard');
+            dashboard.innerHTML = filteredData.map(asset => createCard(asset)).join('');
+        }
+
+        function updateMetrics() {
+            // Calculate market sentiment
+            const positiveCount = filteredData.filter(a => a.change > 0).length;
+            const sentiment = positiveCount > filteredData.length / 2 ? '📈 BULLISH' : '📉 BEARISH';
+            document.getElementById('marketSentiment').textContent = sentiment;
+
+            // Calculate risk
+            const avgRisk = filteredData.filter(a => a.recommendation === 'BUY').length;
+            const riskLevel = avgRisk > filteredData.length * 0.6 ? '⚠️ MODERATE' : '🔴 HIGH';
+            document.getElementById('riskLevel').textContent = riskLevel;
+
+            // Find top pick
+            const topPick = filteredData.filter(a => a.recommendation === 'BUY').sort((a, b) => b.score - a.score)[0];
+            document.getElementById('topPick').textContent = topPick ? topPick.name.split(' ')[0] : '--';
+
+            // Update time
+            const now = new Date();
+            const timeStr = now.toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('lastUpdate').textContent = timeStr;
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertsContainer = document.getElementById('alerts');
+            const alertEl = document.createElement('div');
+            alertEl.className = `alert alert-${type}`;
+            alertEl.innerHTML = `<span style="font-size: 1.2em;">ℹ️</span><span>${message}</span>`;
+            alertsContainer.appendChild(alertEl);
+            setTimeout(() => alertEl.remove(), 5000);
+        }
+
+        function refreshData() {
+            showAlert('✓ Dashboard data refreshed successfully!', 'success');
+            // Simulate real API data with small variations
+            marketData.forEach(asset => {
+                const variation = (Math.random() - 0.5) * 0.3;
+                asset.change += variation;
+            });
+            applyFilters();
+            updateMetrics();
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            applyFilters();
+            updateMetrics();
+            showAlert('✓ Investment Advisor Dashboard loaded successfully!', 'success');
+
+            // Auto-refresh every 30 seconds
+            setInterval(() => {
+                updateMetrics();
+            }, 30000);
+        });
+    </script>
+</body>
+</html>

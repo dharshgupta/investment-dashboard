@@ -1,0 +1,17 @@
+{
+  "name": "investment-advisor-dashboard",
+  "version": "1.0.0",
+  "description": "Professional Investment Advisor Dashboard with Real-time Market Analysis & Trading Signals",
+  "keywords": ["investment", "advisor", "dashboard", "stocks", "trading", "finance", "market-analysis"],
+  "author": "Harsh Gupta",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/investment-advisor-dashboard.git"
+  },
+  "homepage": "https://github.com/YOUR_USERNAME/investment-advisor-dashboard#readme",
+  "scripts": {
+    "start": "open investment-advisor-dashboard.html",
+    "deploy": "git push origin main"
+  }
+}

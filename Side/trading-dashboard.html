@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Session Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #fff;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 1em;
+        }
+
+        .section-title {
+            color: #cbd5e1;
+            font-size: 1.3em;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #475569;
+        }
+
+        .tiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .tile {
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .tile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .tile:hover::before {
+            left: 100%;
+        }
+
+        .tile:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .tile-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .tile-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .tile-change {
+            font-size: 1em;
+            font-weight: 500;
+        }
+
+        /* Green tiles */
+        .tile.green {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            border-color: #10b981;
+            color: #d1fae5;
+        }
+
+        .tile.green .tile-name {
+            color: #a7f3d0;
+        }
+
+        .tile.green .tile-value {
+            color: #6ee7b7;
+        }
+
+        .tile.green .tile-change {
+            color: #d1fae5;
+        }
+
+        /* Red tiles */
+        .tile.red {
+            background: linear-gradient(135deg, #7c2d12 0%, #92400e 100%);
+            border-color: #f97316;
+            color: #fedd8b;
+        }
+
+        .tile.red .tile-name {
+            color: #fca5a5;
+        }
+
+        .tile.red .tile-value {
+            color: #fbbf24;
+        }
+
+        .tile.red .tile-change {
+            color: #fecaca;
+        }
+
+        /* Neutral tiles */
+        .tile.neutral {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            border-color: #64748b;
+            color: #cbd5e1;
+        }
+
+        .tile.neutral .tile-name {
+            color: #e2e8f0;
+        }
+
+        .tile.neutral .tile-value {
+            color: #f1f5f9;
+        }
+
+        .tile.neutral .tile-change {
+            color: #cbd5e1;
+        }
+
+        .tile-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .green .tile-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        .red .tile-badge {
+            background: rgba(249, 115, 22, 0.2);
+            color: #fbbf24;
+        }
+
+        .neutral .tile-badge {
+            background: rgba(100, 116, 139, 0.2);
+            color: #cbd5e1;
+        }
+
+        .timestamp {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9em;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #475569;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #cbd5e1;
+        }
+
+        .legend-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            border: 2px solid;
+        }
+
+        .legend-box.green {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            border-color: #10b981;
+        }
+
+        .legend-box.red {
+            background: linear-gradient(135deg, #7c2d12 0%, #92400e 100%);
+            border-color: #f97316;
+        }
+
+        .legend-box.neutral {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            border-color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .tiles-grid {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 15px;
+            }
+
+            .tile {
+                padding: 15px;
+            }
+
+            .tile-value {
+                font-size: 1.4em;
+            }
+
+            .legend {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Trading Session Dashboard</h1>
+            <p>Live Market Performance - 28 October 2026</p>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box green"></div>
+                <span>Green: Positive Session</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box red"></div>
+                <span>Red: Negative Session</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box neutral"></div>
+                <span>Neutral: Flat/Stable</span>
+            </div>
+        </div>
+
+        <!-- Indian Markets Section -->
+        <div class="section-title">Indian Markets</div>
+        <div class="tiles-grid" id="indianMarkets"></div>
+
+        <!-- Global Markets Section -->
+        <div class="section-title">Global Markets</div>
+        <div class="tiles-grid" id="globalMarkets"></div>
+
+        <!-- Sector Performance Section -->
+        <div class="section-title">Top Sector Performers</div>
+        <div class="tiles-grid" id="sectorMarkets"></div>
+
+        <div class="timestamp" id="updateTime"></div>
+    </div>
+
+    <script>
+        const indianMarkets = [
+            { name: 'Nifty 50', value: '22,749.75', change: -0.02, status: 'neutral' },
+            { name: 'Sensex', value: '73,600.00', change: 0, status: 'neutral' },
+            { name: 'Nifty Next 50', value: '67,820.50', change: 0.27, status: 'green' },
+            { name: 'Nifty Midcap 150', value: '20,380.20', change: 1.29, status: 'green' },
+            { name: 'Nifty Smallcap 250', value: '16,920.40', change: 2.67, status: 'green' }
+        ];
+
+        const globalMarkets = [
+            { name: 'S&P 500', value: '7,722.60', change: 0.60, status: 'green' },
+            { name: 'Nasdaq', value: '26,477.81', change: 1.18, status: 'green' },
+            { name: 'Dow Jones', value: '52,377.57', change: 0.03, status: 'neutral' },
+            { name: 'Nikkei 225', value: '27,891.33', change: 0.4, status: 'green' },
+            { name: 'FTSE 100', value: '8,234.50', change: -0.25, status: 'red' }
+        ];
+
+        const sectorMarkets = [
+            { name: 'Capital Goods', value: '+32.5%', change: 32.5, status: 'green', type: 'sector' },
+            { name: 'Semiconductors', value: '+2.82%', change: 2.82, status: 'green', type: 'sector' },
+            { name: 'Data Centres', value: '+36.8%', change: 36.8, status: 'green', type: 'sector' },
+            { name: 'Pharma', value: '+24.4%', change: 24.4, status: 'green', type: 'sector' },
+            { name: 'Telecom', value: '+33.2%', change: 33.2, status: 'green', type: 'sector' },
+            { name: 'Defence', value: '+38.5%', change: 38.5, status: 'green', type: 'sector' }
+        ];
+
+        function getStatus(change) {
+            if (change > 0.1) return 'green';
+            if (change < -0.1) return 'red';
+            return 'neutral';
+        }
+
+        function createTile(market) {
+            const tile = document.createElement('div');
+            const status = market.status || getStatus(market.change);
+            const changeSymbol = market.change > 0 ? '▲' : market.change < 0 ? '▼' : '─';
+            const changeColor = market.change > 0 ? '+' : '';
+
+            tile.className = `tile ${status}`;
+            tile.innerHTML = `
+                <div class="tile-name">${market.name}</div>
+                <div class="tile-value">${market.value}</div>
+                <div class="tile-change">${changeSymbol} ${changeColor}${Math.abs(market.change).toFixed(2)}%</div>
+                <div class="tile-badge">${status.toUpperCase()}</div>
+            `;
+            return tile;
+        }
+
+        function renderMarkets(data, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            data.forEach(market => {
+                container.appendChild(createTile(market));
+            });
+        }
+
+        function updateTimestamp() {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'Asia/Kolkata'
+            };
+            document.getElementById('updateTime').textContent =
+                `Last Updated: ${now.toLocaleDateString('en-IN', options)} IST`;
+        }
+
+        // Initial render
+        renderMarkets(indianMarkets, 'indianMarkets');
+        renderMarkets(globalMarkets, 'globalMarkets');
+        renderMarkets(sectorMarkets, 'sectorMarkets');
+        updateTimestamp();
+
+        // Update timestamp every second
+        setInterval(updateTimestamp, 1000);
+
+        // Add interactive click functionality
+        document.querySelectorAll('.tile').forEach(tile => {
+            tile.addEventListener('click', function() {
+                const name = this.querySelector('.tile-name').textContent;
+                const value = this.querySelector('.tile-value').textContent;
+                const change = this.querySelector('.tile-change').textContent;
+                alert(`${name}\nValue: ${value}\nChange: ${change}`);
+            });
+        });
+    </script>
+</body>
+</html>

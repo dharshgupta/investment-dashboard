@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Trading Session Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header h1 {
+            color: #fff;
+            font-size: 2.5em;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10b981;
+            border-radius: 20px;
+            color: #6ee7b7;
+        }
+
+        .pulse {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .update-time {
+            color: #cbd5e1;
+            font-size: 0.9em;
+        }
+
+        .refresh-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 1em;
+        }
+
+        .section-title {
+            color: #cbd5e1;
+            font-size: 1.3em;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #475569;
+        }
+
+        .tiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .tile {
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .tile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .tile:hover::before {
+            left: 100%;
+        }
+
+        .tile:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .tile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .tile-name {
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+        .tile-category {
+            font-size: 0.75em;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+
+        .tile-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .tile-info-label {
+            font-weight: 500;
+        }
+
+        .tile-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .tile-change {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .tile-details {
+            font-size: 0.85em;
+            opacity: 0.8;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.75em;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Green tiles */
+        .tile.green {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            border-color: #10b981;
+            color: #d1fae5;
+        }
+
+        .tile.green .tile-name {
+            color: #a7f3d0;
+        }
+
+        .tile.green .tile-value {
+            color: #6ee7b7;
+        }
+
+        .tile.green .tile-category {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        /* Red tiles */
+        .tile.red {
+            background: linear-gradient(135deg, #7c2d12 0%, #92400e 100%);
+            border-color: #f97316;
+            color: #fedd8b;
+        }
+
+        .tile.red .tile-name {
+            color: #fca5a5;
+        }
+
+        .tile.red .tile-value {
+            color: #fbbf24;
+        }
+
+        .tile.red .tile-category {
+            background: rgba(249, 115, 22, 0.2);
+            color: #fbbf24;
+        }
+
+        /* Neutral tiles */
+        .tile.neutral {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            border-color: #64748b;
+            color: #cbd5e1;
+        }
+
+        .tile.neutral .tile-name {
+            color: #e2e8f0;
+        }
+
+        .tile.neutral .tile-value {
+            color: #f1f5f9;
+        }
+
+        .tile.neutral .tile-category {
+            background: rgba(100, 116, 139, 0.2);
+            color: #cbd5e1;
+        }
+
+        .tile-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .green .tile-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        .red .tile-badge {
+            background: rgba(249, 115, 22, 0.2);
+            color: #fbbf24;
+        }
+
+        .neutral .tile-badge {
+            background: rgba(100, 116, 139, 0.2);
+            color: #cbd5e1;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #cbd5e1;
+        }
+
+        .legend-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            border: 2px solid;
+        }
+
+        .legend-box.green {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            border-color: #10b981;
+        }
+
+        .legend-box.red {
+            background: linear-gradient(135deg, #7c2d12 0%, #92400e 100%);
+            border-color: #f97316;
+        }
+
+        .legend-box.neutral {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            border-color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .tiles-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .status-bar {
+                flex-direction: column;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <div>
+                    <h1>📊 Live Trading Dashboard</h1>
+                    <p>Real-time Market Performance Tracker</p>
+                </div>
+                <div class="status-bar">
+                    <div class="live-indicator">
+                        <div class="pulse"></div>
+                        <span>LIVE</span>
+                    </div>
+                    <button class="refresh-btn" onclick="refreshData()">↻ Refresh Now</button>
+                </div>
+            </div>
+            <div class="update-time" id="updateTime">Last Updated: Loading...</div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box green"></div>
+                <span>Green: Positive Session (↑)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box red"></div>
+                <span>Red: Negative Session (↓)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box neutral"></div>
+                <span>Neutral: Flat Session (─)</span>
+            </div>
+        </div>
+
+        <!-- Indian Markets Section -->
+        <div class="section-title">🇮🇳 Indian Markets</div>
+        <div class="tiles-grid" id="indianMarkets"></div>
+
+        <!-- Asian Markets Section -->
+        <div class="section-title">🌏 Asian Markets</div>
+        <div class="tiles-grid" id="asianMarkets"></div>
+
+        <!-- Global Markets Section -->
+        <div class="section-title">🌍 Global Markets</div>
+        <div class="tiles-grid" id="globalMarkets"></div>
+
+        <!-- Sector Performance Section -->
+        <div class="section-title">📈 Top Sector Performers</div>
+        <div class="tiles-grid" id="sectorMarkets"></div>
+
+        <!-- Commodities Section -->
+        <div class="section-title">⚡ Commodities & Currencies</div>
+        <div class="tiles-grid" id="commodities"></div>
+    </div>
+
+    <script>
+        const marketData = {
+            indianMarkets: [
+                { name: 'Nifty 50', country: 'India', value: '22,749.75', change: -0.02, category: 'Index', pe: '22.70x', oneyear: '+11.40%' },
+                { name: 'Sensex', country: 'India', value: '73,600.00', change: 0, category: 'Index', pe: '22.95x', oneyear: '+11.10%' },
+                { name: 'Nifty Next 50', country: 'India', value: '67,820.50', change: 0.27, category: 'Index', pe: '24.90x', oneyear: '+17.90%' },
+                { name: 'Nifty Midcap 150', country: 'India', value: '20,380.20', change: 1.29, category: 'Index', pe: '27.40x', oneyear: '+21.80%' },
+                { name: 'Nifty Smallcap 250', country: 'India', value: '16,920.40', change: 2.67, category: 'Index', pe: '34.20x', oneyear: '+23.20%' }
+            ],
+            asianMarkets: [
+                { name: 'Nikkei 225', country: 'Japan', value: '27,891.33', change: 0.4, category: 'Index', pe: '16.50x', oneyear: '+18.5%' },
+                { name: 'KOSPI', country: 'South Korea', value: '2,634.50', change: 0.8, category: 'Index', pe: '11.30x', oneyear: '+22.4%' },
+                { name: 'TAIEX', country: 'Taiwan', value: '22,450.25', change: 1.2, category: 'Index', pe: '19.30x', oneyear: '+25.6%' },
+                { name: 'Shanghai Composite', country: 'China', value: '3,324.50', change: -0.5, category: 'Index', pe: '12.90x', oneyear: '+8.2%' },
+                { name: 'Hang Seng', country: 'Hong Kong', value: '18,234.80', change: 0.3, category: 'Index', pe: '11.40x', oneyear: '+15.3%' }
+            ],
+            globalMarkets: [
+                { name: 'S&P 500', country: 'USA', value: '7,722.60', change: 0.60, category: 'Index', pe: '26.10x', oneyear: '+22.30%' },
+                { name: 'Nasdaq', country: 'USA', value: '26,477.81', change: 1.18, category: 'Index', pe: '28.50x', oneyear: '+28.40%' },
+                { name: 'Dow Jones', country: 'USA', value: '52,377.57', change: 0.03, category: 'Index', pe: '18.20x', oneyear: '+12.50%' },
+                { name: 'FTSE 100', country: 'UK', value: '8,234.50', change: -0.25, category: 'Index', pe: '12.40x', oneyear: '+8.3%' },
+                { name: 'DAX 40', country: 'Germany', value: '18,456.75', change: 0.45, category: 'Index', pe: '14.00x', oneyear: '+14.2%' },
+                { name: 'CAC 40', country: 'France', value: '7,823.20', change: 0.22, category: 'Index', pe: '14.80x', oneyear: '+11.5%' }
+            ],
+            sectorMarkets: [
+                { name: 'Capital Goods', country: 'India', value: '+32.5%', change: 32.5, category: 'Sector', pe: '36.50x', oneyear: '+28.8%' },
+                { name: 'Semiconductors', country: 'Global', value: '+2.82%', change: 2.82, category: 'Sector', pe: '61.50x', oneyear: '+53.2%' },
+                { name: 'Data Centres', country: 'Global', value: '+36.8%', change: 36.8, category: 'Sector', pe: '43.20x', oneyear: '+36.8%' },
+                { name: 'Pharma', country: 'India', value: '+24.4%', change: 24.4, category: 'Sector', pe: '29.10x', oneyear: '+24.4%' },
+                { name: 'Telecom', country: 'India', value: '+33.2%', change: 33.2, category: 'Sector', pe: '30.90x', oneyear: '+33.2%' },
+                { name: 'Defence', country: 'India', value: '+38.5%', change: 38.5, category: 'Sector', pe: '46.80x', oneyear: '+38.5%' },
+                { name: 'Private Banking', country: 'India', value: '+14.1%', change: 14.1, category: 'Sector', pe: '17.00x', oneyear: '+14.1%' },
+                { name: 'IT Services', country: 'India', value: '+11.5%', change: 11.5, category: 'Sector', pe: '27.90x', oneyear: '+11.5%' }
+            ],
+            commodities: [
+                { name: 'Brent Crude', country: 'Global', value: '$114.03/bbl', change: -1.54, category: 'Commodity', pe: '85th percentile', oneyear: '+27.60%' },
+                { name: 'Gold (Spot)', country: 'Global', value: '$3,993.96/oz', change: -3.80, category: 'Commodity', pe: '88th percentile', oneyear: '+31.80%' },
+                { name: 'USD/INR', country: 'Currency', value: '95.12', change: 0.05, category: 'Currency', pe: 'Stable', oneyear: '+2.1%' },
+                { name: 'EUR/USD', country: 'Currency', value: '1.0875', change: 0.12, category: 'Currency', pe: 'Stable', oneyear: '+1.5%' },
+                { name: 'BTC/USD', country: 'Crypto', value: '$67,234.50', change: 3.45, category: 'Digital Asset', pe: 'Volatile', oneyear: '+145.3%' }
+            ]
+        };
+
+        function getStatus(change) {
+            if (change > 0.1) return 'green';
+            if (change < -0.1) return 'red';
+            return 'neutral';
+        }
+
+        function createTile(market) {
+            const tile = document.createElement('div');
+            const status = getStatus(market.change);
+            const changeSymbol = market.change > 0 ? '▲' : market.change < 0 ? '▼' : '─';
+            const changeColor = market.change > 0 ? '+' : '';
+
+            tile.className = `tile ${status}`;
+            tile.innerHTML = `
+                <div class="tile-header">
+                    <div class="tile-name">${market.name}</div>
+                    <div class="tile-category">${market.category}</div>
+                </div>
+                <div class="tile-info">
+                    <span class="tile-info-label">📍 ${market.country}</span>
+                </div>
+                <div class="tile-value">${market.value}</div>
+                <div class="tile-change">${changeSymbol} ${changeColor}${Math.abs(market.change).toFixed(2)}%</div>
+                <div class="tile-details">
+                    <div class="detail-item">
+                        <div class="detail-label">P/E Ratio</div>
+                        <div class="detail-value">${market.pe}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">1 Year Return</div>
+                        <div class="detail-value">${market.oneyear}</div>
+                    </div>
+                </div>
+                <div class="tile-badge">${status.toUpperCase()}</div>
+            `;
+            return tile;
+        }
+
+        function renderMarkets(data, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+            data.forEach(market => {
+                container.appendChild(createTile(market));
+            });
+        }
+
+        function updateTimestamp() {
+            const now = new Date();
+            const options = {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'Asia/Kolkata'
+            };
+            document.getElementById('updateTime').textContent =
+                `Last Updated: ${now.toLocaleDateString('en-IN', options)} IST`;
+        }
+
+        function refreshData() {
+            // Simulate live update by adding small random changes
+            const addNoise = (value) => {
+                const noise = (Math.random() - 0.5) * 0.5;
+                return parseFloat((value + noise).toFixed(2));
+            };
+
+            Object.keys(marketData).forEach(key => {
+                marketData[key].forEach(market => {
+                    market.change = addNoise(market.change);
+                });
+            });
+
+            renderAllMarkets();
+            updateTimestamp();
+            showNotification('Data refreshed!');
+        }
+
+        function renderAllMarkets() {
+            renderMarkets(marketData.indianMarkets, 'indianMarkets');
+            renderMarkets(marketData.asianMarkets, 'asianMarkets');
+            renderMarkets(marketData.globalMarkets, 'globalMarkets');
+            renderMarkets(marketData.sectorMarkets, 'sectorMarkets');
+            renderMarkets(marketData.commodities, 'commodities');
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #10b981;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 2000);
+        }
+
+        // Initial render
+        renderAllMarkets();
+        updateTimestamp();
+
+        // Auto-update every 30 seconds
+        setInterval(() => {
+            updateTimestamp();
+        }, 1000);
+
+        setInterval(() => {
+            refreshData();
+        }, 30000);
+
+        // Add animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

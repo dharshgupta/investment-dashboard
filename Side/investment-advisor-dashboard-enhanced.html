@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Advisor Dashboard - With Sector Details</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e2e8f0;
+        }
+        .container { max-width: 2000px; margin: 0 auto; }
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid #475569;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.9) 100%);
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #3b82f6;
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.15);
+        }
+        .card-title { font-size: 1.4em; font-weight: 700; margin-bottom: 10px; }
+        .card-meta { font-size: 0.9em; color: #cbd5e1; margin-bottom: 15px; }
+        .card-value { font-size: 2em; font-weight: 700; margin-bottom: 10px; }
+        .card-change { font-size: 1.1em; margin-bottom: 15px; font-weight: 600; }
+        .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75em; font-weight: 600; display: inline-block; margin-right: 8px; margin-bottom: 8px; }
+        .badge-green { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid #10b981; }
+        .badge-red { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
+        .badge-orange { background: rgba(249, 115, 22, 0.2); color: #fbbf24; border: 1px solid #f97316; }
+        .click-hint { position: absolute; bottom: 15px; right: 15px; font-size: 0.8em; color: #3b82f6; font-weight: 600; opacity: 0.7; }
+        .card:hover .click-hint { opacity: 1; }
+
+        /* MODAL STYLES */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            margin: 5% auto;
+            padding: 30px;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #475569;
+            padding-bottom: 20px;
+        }
+        .modal-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2.5em;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .close-btn:hover { color: #ef4444; }
+        .stocks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .stock-item {
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        .stock-item:hover {
+            background: rgba(51, 65, 85, 0.8);
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.2);
+        }
+        .stock-abbr { font-size: 0.8em; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .stock-name { font-size: 1.3em; font-weight: 700; color: #f1f5f9; margin-bottom: 12px; }
+        .stock-info { display: flex; flex-direction: column; gap: 8px; font-size: 0.9em; color: #cbd5e1; }
+        .stock-info-item { display: flex; justify-content: space-between; }
+        .text-green { color: #10b981; }
+        .text-red { color: #ef4444; }
+        @media (max-width: 768px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .modal-content { width: 95%; margin: 20% auto; }
+            .stocks-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💼 Investment Advisor Dashboard</h1>
+            <p style="color: #94a3b8;">Real-time Market Analysis • Click on SECTORS to see individual stocks</p>
+        </div>
+
+        <div class="dashboard-grid" id="dashboard"></div>
+
+        <!-- MODAL -->
+        <div id="sectorModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modalTitle">Sector Stocks</h2>
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="stocks-grid" id="stocksList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const assets = [
+            // SECTORS WITH STOCKS
+            { name: 'Capital Goods', abbr: 'CAPG', category: 'sector', value: 32.5, change: 32.5, recommendation: 'BUY', risk: 'HIGH', pe: '36.5x',
+              stocks: [
+                { name: 'Larsen & Toubro', abbr: 'LT', price: 3450.50, change: 2.5 },
+                { name: 'Siemens India', abbr: 'SIEMENS', price: 6280.75, change: 1.8 },
+                { name: 'ABB India', abbr: 'ABB', price: 4125.30, change: 2.1 }
+              ]
+            },
+            { name: 'Private Banking', abbr: 'PVTBK', category: 'sector', value: 14.1, change: 14.1, recommendation: 'BUY', risk: 'LOW', pe: '17.0x',
+              stocks: [
+                { name: 'Kotak Mahindra Bank', abbr: 'KOTAKBANK', price: 490.25, change: 3.2 },
+                { name: 'IDFC First Bank', abbr: 'IDFCFIRSTB', price: 85.50, change: 5.1 },
+                { name: 'ICICI Bank', abbr: 'ICICIBANK', price: 925.80, change: 2.8 },
+                { name: 'Axis Bank', abbr: 'AXISBANK', price: 1145.40, change: 2.3 }
+              ]
+            },
+            { name: 'Pharmaceuticals', abbr: 'PHARMA', category: 'sector', value: 24.4, change: 24.4, recommendation: 'BUY', risk: 'MEDIUM', pe: '29.1x',
+              stocks: [
+                { name: 'Cipla', abbr: 'CIPLA', price: 1285.65, change: 2.9 },
+                { name: 'Torrent Pharma', abbr: 'TORRENTPHARMA', price: 2340.50, change: 4.2 },
+                { name: 'Sun Pharma', abbr: 'SUNPHARMA', price: 1565.30, change: 1.8 },
+                { name: 'Dr Reddy\'s', abbr: 'DRREDDY', price: 6890.25, change: 3.1 }
+              ]
+            },
+            { name: 'IT Services', abbr: 'IT', category: 'sector', value: 11.5, change: 11.5, recommendation: 'BUY', risk: 'MEDIUM', pe: '27.9x',
+              stocks: [
+                { name: 'Infosys', abbr: 'INFY', price: 2150.75, change: 2.4 },
+                { name: 'TCS', abbr: 'TCS', price: 4230.80, change: 1.9 },
+                { name: 'Wipro', abbr: 'WIPRO', price: 385.40, change: 1.2 },
+                { name: 'HCL Tech', abbr: 'HCLTECH', price: 1875.20, change: 2.6 }
+              ]
+            },
+            { name: 'Telecom', abbr: 'TCOM', category: 'sector', value: 33.2, change: 33.2, recommendation: 'BUY', risk: 'MEDIUM', pe: '30.9x',
+              stocks: [
+                { name: 'Jio Platforms', abbr: 'JIOPLATFORMS', price: 285.50, change: 5.8 },
+                { name: 'Bharti Airtel', abbr: 'BHARTI', price: 945.80, change: 3.2 },
+                { name: 'Vodafone Idea', abbr: 'VODAFONE', price: 8.25, change: 4.5 }
+              ]
+            },
+            { name: 'Defence', abbr: 'DEF', category: 'sector', value: 38.5, change: 38.5, recommendation: 'BUY', risk: 'HIGH', pe: '46.8x',
+              stocks: [
+                { name: 'Mazagon Dock', abbr: 'MAZAGON', price: 5420.30, change: 4.1 },
+                { name: 'HAL India', abbr: 'HAL', price: 4895.70, change: 3.8 },
+                { name: 'Bharat Dynamics', abbr: 'BDL', price: 645.50, change: 2.3 }
+              ]
+            },
+
+            // INDICES (no stocks)
+            { name: 'Nifty 50', abbr: 'NIFTY50', category: 'index', value: 22749.75, change: 0.5, recommendation: 'BUY', risk: 'MEDIUM', pe: '22.7x', stocks: null },
+            { name: 'S&P 500', abbr: 'SPX', category: 'index', value: 7722.60, change: 0.60, recommendation: 'BUY', risk: 'MEDIUM', pe: '26.1x', stocks: null },
+            { name: 'Nasdaq', abbr: 'CCMP', category: 'index', value: 26477.81, change: 1.18, recommendation: 'BUY', risk: 'MEDIUM-HIGH', pe: '28.5x', stocks: null },
+
+            // COMMODITIES (no stocks)
+            { name: 'Brent Crude', abbr: 'BRENT', category: 'commodity', value: 114.03, change: -1.54, recommendation: 'SELL', risk: 'HIGH', pe: 'N/A', stocks: null },
+            { name: 'Gold (Spot)', abbr: 'GOLD', category: 'commodity', value: 3993.96, change: -3.80, recommendation: 'HOLD', risk: 'HIGH', pe: 'N/A', stocks: null },
+
+            // CURRENCIES (no stocks)
+            { name: 'USD/INR', abbr: 'USDINR', category: 'currency', value: 95.12, change: 0.05, recommendation: 'HOLD', risk: 'MEDIUM', pe: 'N/A', stocks: null },
+            { name: 'EUR/USD', abbr: 'EURUSD', category: 'currency', value: 1.0875, change: 0.12, recommendation: 'HOLD', risk: 'MEDIUM', pe: 'N/A', stocks: null }
+        ];
+
+        function getBadgeClass(rec) {
+            if (rec === 'BUY') return 'badge-green';
+            if (rec === 'SELL') return 'badge-red';
+            return 'badge-orange';
+        }
+
+        function createCard(asset) {
+            const changeColor = asset.change > 0 ? 'text-green' : 'text-red';
+            const changeSymbol = asset.change > 0 ? '▲' : '▼';
+            const isSector = asset.category === 'sector';
+            const hintText = isSector ? '<div class="click-hint">Click to see stocks ↗</div>' : '';
+
+            return `
+                <div class="card" onclick="handleCardClick(event)">
+                    <div class="card-title">${asset.name}</div>
+                    <div class="card-meta">
+                        📌 ${asset.abbr} • 📊 ${asset.category.toUpperCase()}
+                    </div>
+                    <div class="card-value">${typeof asset.value === 'number' ? (asset.value > 100 ? asset.value.toFixed(2) : asset.value.toFixed(4)) : asset.value}</div>
+                    <div class="card-change ${changeColor}">${changeSymbol} ${Math.abs(asset.change).toFixed(2)}%</div>
+                    <div>
+                        <span class="badge ${getBadgeClass(asset.recommendation)}">${asset.recommendation}</span>
+                        <span class="badge">${asset.risk}</span>
+                        ${asset.pe !== 'N/A' ? `<span class="badge">P/E: ${asset.pe}</span>` : ''}
+                    </div>
+                    ${hintText}
+                </div>
+            `;
+        }
+
+        function handleCardClick(event) {
+            const card = event.currentTarget;
+            const text = card.querySelector('.card-title').textContent;
+            const asset = assets.find(a => a.name === text);
+
+            if (asset && asset.stocks) {
+                openSectorModal(asset);
+            } else if (asset) {
+                alert(`${asset.name} (${asset.abbr}) is an ${asset.category.toUpperCase()}.\n\nOnly SECTORS show individual stocks. Try clicking on:\n• Capital Goods\n• Private Banking\n• Pharmaceuticals\n• IT Services\n• Telecom\n• Defence`);
+            }
+        }
+
+        function openSectorModal(asset) {
+            document.getElementById('modalTitle').textContent = `${asset.name} (${asset.abbr}) - Companies`;
+            const stocksList = document.getElementById('stocksList');
+            stocksList.innerHTML = asset.stocks.map(stock => `
+                <div class="stock-item">
+                    <div class="stock-abbr">${stock.abbr}</div>
+                    <div class="stock-name">${stock.name}</div>
+                    <div class="stock-info">
+                        <div class="stock-info-item">
+                            <span>Price:</span>
+                            <span style="color: #10b981;">₹${stock.price.toFixed(2)}</span>
+                        </div>
+                        <div class="stock-info-item">
+                            <span>Change:</span>
+                            <span class="${stock.change > 0 ? 'text-green' : 'text-red'};">
+                                ${stock.change > 0 ? '▲' : '▼'} ${Math.abs(stock.change).toFixed(2)}%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('sectorModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('sectorModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('sectorModal');
+            if (event.target === modal) modal.style.display = 'none';
+        }
+
+        // Render dashboard
+        document.getElementById('dashboard').innerHTML = assets.map(a => createCard(a)).join('');
+    </script>
+</body>
+</html>

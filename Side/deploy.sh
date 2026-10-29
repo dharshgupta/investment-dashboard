@@ -1,0 +1,101 @@
+#!/bin/bash
+# Investment Advisor Dashboard - Quick Deployment Script
+
+echo "🚀 Investment Advisor Dashboard - Deployment Setup"
+echo "=================================================="
+echo ""
+
+# Check if git is installed
+if ! command -v git &> /dev/null; then
+    echo "❌ Git not found. Please install Git first."
+    exit 1
+fi
+
+echo "✅ Git found!"
+echo ""
+
+# GitHub Setup Instructions
+echo "📌 GITHUB PAGES SETUP INSTRUCTIONS:"
+echo "-----------------------------------"
+echo ""
+echo "Step 1: Create a new repository at github.com/new"
+echo "        Name: investment-advisor-dashboard"
+echo "        Make it PUBLIC"
+echo ""
+echo "Step 2: Run these commands in your terminal:"
+echo ""
+echo "  cd /path/to/Side"
+echo "  git init"
+echo "  git add ."
+echo "  git commit -m 'Deploy: Investment Advisor Dashboard v1.0'"
+echo "  git branch -M main"
+echo "  git remote add origin https://github.com/YOUR_USERNAME/investment-advisor-dashboard.git"
+echo "  git push -u origin main"
+echo ""
+echo "Step 3: Enable GitHub Pages:"
+echo "        - Go to Settings → Pages"
+echo "        - Source: Deploy from a branch"
+echo "        - Branch: main, Folder: /"
+echo "        - Save"
+echo ""
+echo "Step 4: Your dashboard will be live at:"
+echo "        https://YOUR_USERNAME.github.io/investment-advisor-dashboard/"
+echo ""
+echo "=================================================="
+echo ""
+
+# Netlify Instructions
+echo "📌 NETLIFY DEPLOYMENT (EASIEST):"
+echo "--------------------------------"
+echo ""
+echo "Step 1: Go to netlify.com and sign up"
+echo ""
+echo "Step 2: Drag & drop investment-advisor-dashboard.html"
+echo ""
+echo "Step 3: Done! You'll get an instant live URL"
+echo ""
+echo "Custom domain:"
+echo "  - Domain settings → Add custom domain"
+echo "  - Connect your DNS records"
+echo ""
+echo "=================================================="
+echo ""
+
+# Vercel Instructions
+echo "📌 VERCEL DEPLOYMENT (FASTEST):"
+echo "-------------------------------"
+echo ""
+echo "Step 1: Go to vercel.com"
+echo ""
+echo "Step 2: Click 'New Project'"
+echo ""
+echo "Step 3: Upload the /Side folder or connect GitHub"
+echo ""
+echo "Step 4: Auto-deployed with live URL!"
+echo ""
+echo "=================================================="
+echo ""
+
+echo "📊 FILES READY FOR DEPLOYMENT:"
+echo "----------------------------"
+echo "✓ investment-advisor-dashboard.html (Main app - 50KB)"
+echo "✓ README.md (Documentation)"
+echo "✓ DEPLOYMENT_GUIDE.md (Detailed guide)"
+echo "✓ package.json (Project metadata)"
+echo "✓ .gitignore (Git config)"
+echo ""
+
+echo "💾 LOCAL FILE LOCATION:"
+echo "---------------------"
+echo "C:\Users\Harsh.Gupta1\Documents\Side\"
+echo ""
+
+echo "🌐 AFTER DEPLOYMENT, SHARE THESE LINKS:"
+echo "--------------------------------------"
+echo "✓ GitHub Pages: https://YOUR_USERNAME.github.io/investment-advisor-dashboard/"
+echo "✓ Netlify: https://your-app.netlify.app/"
+echo "✓ Vercel: https://your-app.vercel.app/"
+echo ""
+
+echo "✅ Everything is ready! Choose your deployment platform above."
+echo ""
