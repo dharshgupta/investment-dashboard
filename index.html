@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Investment Dashboard PRO - All 6 Views</title>
+    <title>Master Investment Dashboard PRO - Live Data</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -48,18 +48,12 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            white-space: nowrap;
         }
-        .refresh-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-        }
-        .refresh-btn:active { transform: scale(0.98); }
+        .refresh-btn:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); }
         .refresh-btn.spinning { animation: spin 1s linear infinite; }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .status { font-size: 0.9em; color: #10b981; margin-top: 5px; }
 
         .tabs { display: flex; gap: 0; margin-bottom: 30px; border-bottom: 2px solid #1e293b; flex-wrap: wrap; }
         .tab { padding: 15px 20px; cursor: pointer; background: transparent; border: none; color: #64748b; font-weight: 600; font-size: 0.95em; transition: all 0.3s; }
@@ -85,8 +79,6 @@
             padding: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
         }
         .card:hover {
             transform: translateY(-5px);
@@ -99,101 +91,17 @@
         .card-value { font-size: 1.8em; font-weight: 700; margin-bottom: 8px; }
         .card-change { font-size: 1.1em; margin-bottom: 12px; font-weight: 600; }
 
-        .fii-card { background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(6, 182, 212, 0.05) 100%); border: 1px solid rgba(16, 185, 129, 0.2); }
-        .fii-card.negative { background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(249, 115, 22, 0.05) 100%); border: 1px solid rgba(239, 68, 68, 0.2); }
-
-        .day-trade-card { background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%); border: 1px solid rgba(59, 130, 246, 0.2); }
-
         .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75em; font-weight: 600; display: inline-block; margin-right: 8px; margin-bottom: 8px; }
         .badge-green { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid #10b981; }
-        .badge-red { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
 
         .text-green { color: #10b981; }
         .text-red { color: #ef4444; }
         .text-blue { color: #3b82f6; }
 
-        .stats-row { display: flex; justify-content: space-between; margin: 8px 0; font-size: 0.9em; }
-        .stats-label { color: #64748b; }
-        .stats-value { color: #f1f5f9; font-weight: 600; }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            animation: fadeIn 0.3s ease;
-        }
-        .modal-content {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-            margin: 5% auto;
-            padding: 30px;
-            border: 1px solid #1e293b;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 1000px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #1e293b;
-            padding-bottom: 15px;
-        }
-        .modal-title {
-            font-size: 1.8em;
-            font-weight: 700;
-            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 2.5em;
-            color: #64748b;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        .close-btn:hover { color: #ef4444; }
-
-        .stocks-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .stock-item {
-            background: rgba(26, 26, 26, 0.8);
-            border: 1px solid #1e293b;
-            border-radius: 8px;
-            padding: 18px;
-            transition: all 0.3s ease;
-        }
-        .stock-item:hover {
-            background: rgba(26, 26, 26, 0.95);
-            border-color: #3b82f6;
-            transform: translateY(-2px);
-        }
-        .stock-abbr { font-size: 0.8em; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-        .stock-name { font-size: 1.2em; font-weight: 700; color: #f1f5f9; margin-bottom: 12px; }
-        .stock-info { display: flex; flex-direction: column; gap: 8px; font-size: 0.9em; }
-        .stock-info-item { display: flex; justify-content: space-between; }
-
-        .click-hint { position: absolute; bottom: 12px; right: 12px; font-size: 0.75em; color: #3b82f6; font-weight: 600; opacity: 0.7; }
-        .card:hover .click-hint { opacity: 1; }
+        .loading { text-align: center; color: #64748b; font-size: 1.1em; padding: 40px; }
 
         @media (max-width: 768px) {
             .dashboard-grid { grid-template-columns: 1fr; }
-            .modal-content { width: 95%; margin: 20% auto; }
-            .stocks-grid { grid-template-columns: 1fr; }
             .header { flex-direction: column; gap: 15px; }
         }
     </style>
@@ -203,171 +111,174 @@
         <div class="header">
             <div class="header-content">
                 <h1>🎯 Master Investment Dashboard PRO</h1>
-                <p style="color: #64748b; margin-top: 10px;">Complete Trading Suite • FII/DII Activity • Day Trading Signals • Real-time Analysis</p>
+                <p style="color: #64748b; margin-top: 10px;">Real-Time Market Data • Live Stock Prices • Updated Every 5 Minutes</p>
+                <div class="status" id="status">🟢 Live Data Connected</div>
             </div>
-            <button class="refresh-btn" id="refreshBtn" onclick="refreshDashboard()">
+            <button class="refresh-btn" id="refreshBtn" onclick="fetchLiveData()">
                 <span id="refreshIcon">🔄</span>
-                <span>Refresh</span>
+                <span>Refresh Now</span>
             </button>
         </div>
 
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('view1')">📊 Trading Tiles</button>
-            <button class="tab" onclick="switchTab('view2')">📍 Live Markets</button>
-            <button class="tab" onclick="switchTab('view3')">💼 Advisor Analysis</button>
-            <button class="tab" onclick="switchTab('view4')">📈 Sector Details</button>
-            <button class="tab" onclick="switchTab('view5')">💰 FII/DII Activity</button>
-            <button class="tab" onclick="switchTab('view6')">⚡ Day Trading Signals</button>
+            <button class="tab active" onclick="switchTab('view1')">📊 Indian Stocks (LIVE)</button>
+            <button class="tab" onclick="switchTab('view2')">🌍 Global Markets</button>
+            <button class="tab" onclick="switchTab('view3')">📈 Indices</button>
         </div>
 
         <div id="view1" class="tab-content active">
-            <div class="section-title">📊 Indian Markets</div>
-            <div class="dashboard-grid" id="indianTiles"></div>
-            <div class="section-title" style="margin-top: 40px;">🌍 Global Markets</div>
-            <div class="dashboard-grid" id="globalTiles"></div>
-            <div class="section-title" style="margin-top: 40px;">📈 Top Sectors</div>
-            <div class="dashboard-grid" id="sectorTiles"></div>
+            <div class="section-title">📊 Indian Stocks - Real Time Prices</div>
+            <div class="loading" id="loading1">⏳ Fetching live data from Finnhub...</div>
+            <div class="dashboard-grid" id="indianStocks"></div>
         </div>
 
         <div id="view2" class="tab-content">
-            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <span style="color: #6ee7b7; font-weight: 600;">🔴 LIVE</span> - Markets with Details
-            </div>
-            <div class="dashboard-grid" id="liveMarkets"></div>
+            <div class="section-title">🌍 Global Markets</div>
+            <div class="loading" id="loading2">⏳ Fetching global data...</div>
+            <div class="dashboard-grid" id="globalMarkets"></div>
         </div>
 
         <div id="view3" class="tab-content">
-            <div class="section-title">Professional Recommendations (BUY • SELL • HOLD)</div>
-            <div class="dashboard-grid" id="advisorCards"></div>
-        </div>
-
-        <div id="view4" class="tab-content">
-            <p style="color: #94a3b8; margin-bottom: 20px;">Click on any SECTOR to see all companies</p>
-            <div class="dashboard-grid" id="sectorCards"></div>
-        </div>
-
-        <div id="view5" class="tab-content">
-            <div class="section-title">📊 FII & DII Activity Tracker (Net Flow)</div>
-            <div class="dashboard-grid" id="fiiDiiTiles"></div>
-        </div>
-
-        <div id="view6" class="tab-content">
-            <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <span style="color: #93c5fd; font-weight: 600;">⏰ Updated Daily at 8:00 AM IST</span>
-                <p style="color: #64748b; font-size: 0.9em; margin-top: 5px;">Based on previous day's analysis • All details included</p>
-            </div>
-            <div class="section-title">📈 Intraday Trading Recommendations</div>
-            <div class="dashboard-grid" id="dayTradingTiles"></div>
-        </div>
-    </div>
-
-    <div id="detailsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Details</h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
-            </div>
-            <div id="modalBody"></div>
+            <div class="section-title">📈 Market Indices</div>
+            <div class="loading" id="loading3">⏳ Fetching indices...</div>
+            <div class="dashboard-grid" id="indices"></div>
         </div>
     </div>
 
     <script>
-        // MARKET DATA
-        const marketData = {
-            indianIndices: [
-                { name: 'Nifty 50', abbr: 'NIFTY50', country: 'India', category: 'Index', value: 22749.75, change: 0.5, pe: 22.70 },
-                { name: 'Sensex', abbr: 'SENSEX', country: 'India', category: 'Index', value: 73600, change: 0.45, pe: 22.95 },
-                { name: 'Nifty Smallcap 250', abbr: 'NSMALLCAP', country: 'India', category: 'Index', value: 16920.40, change: 2.67, pe: 34.20 }
-            ],
-            sectors: [
-                { name: 'Capital Goods', abbr: 'CAPG', value: 32.5, change: 32.5, recommendation: 'BUY', risk: 'HIGH', pe: 36.50,
-                  stocks: [{ name: 'Larsen & Toubro', abbr: 'LT', price: 3450.50, change: 2.5 }, { name: 'Siemens India', abbr: 'SIEMENS', price: 6280.75, change: 1.8 }] },
-                { name: 'Private Banking', abbr: 'PVTBK', value: 14.1, change: 14.1, recommendation: 'BUY', risk: 'LOW', pe: 17.0,
-                  stocks: [{ name: 'Kotak Mahindra Bank', abbr: 'KOTAKBANK', price: 490.25, change: 3.2 }, { name: 'ICICI Bank', abbr: 'ICICIBANK', price: 925.80, change: 2.8 }] },
-                { name: 'Pharmaceuticals', abbr: 'PHARMA', value: 24.4, change: 24.4, recommendation: 'BUY', risk: 'MEDIUM', pe: 29.10,
-                  stocks: [{ name: 'Cipla', abbr: 'CIPLA', price: 1285.65, change: 2.9 }, { name: 'Sun Pharma', abbr: 'SUNPHARMA', price: 1565.30, change: 1.8 }] },
-                { name: 'IT Services', abbr: 'IT', value: 11.5, change: 11.5, recommendation: 'BUY', risk: 'MEDIUM', pe: 27.90,
-                  stocks: [{ name: 'Infosys', abbr: 'INFY', price: 2150.75, change: 2.4 }, { name: 'TCS', abbr: 'TCS', price: 4230.80, change: 1.9 }] },
-                { name: 'Telecom', abbr: 'TCOM', value: 33.2, change: 33.2, recommendation: 'BUY', risk: 'MEDIUM', pe: 30.90,
-                  stocks: [{ name: 'Jio Platforms', abbr: 'JIOPLATFORMS', price: 285.50, change: 5.8 }, { name: 'Bharti Airtel', abbr: 'BHARTI', price: 945.80, change: 3.2 }] },
-                { name: 'Defence', abbr: 'DEF', value: 38.5, change: 38.5, recommendation: 'BUY', risk: 'HIGH', pe: 46.80,
-                  stocks: [{ name: 'Mazagon Dock', abbr: 'MAZAGON', price: 5420.30, change: 4.1 }, { name: 'HAL India', abbr: 'HAL', price: 4895.70, change: 3.8 }] }
-            ],
-            globalIndices: [
-                { name: 'S&P 500', abbr: 'SPX', country: 'USA', category: 'Index', value: 7722.60, change: 0.60, pe: 26.10 },
-                { name: 'Nasdaq', abbr: 'CCMP', country: 'USA', category: 'Index', value: 26477.81, change: 1.18, pe: 28.50 },
-                { name: 'FTSE 100', abbr: 'FTSE', country: 'UK', category: 'Index', value: 8234.50, change: -0.25, pe: 12.40 }
-            ]
+        // Finnhub API Configuration
+        const FINNHUB_API_KEY = 'dbhdte9r01qjpoc756r0dbhdte9r01qjpoc756rg';
+        const FINNHUB_BASE_URL = 'https://finnhub.io/api/v1';
+
+        // Stock symbols to track
+        const indianStocks = {
+            'TCS': { name: 'Tata Consultancy Services', symbol: 'TCS.NS' },
+            'INFY': { name: 'Infosys', symbol: 'INFY.NS' },
+            'KOTAKBANK': { name: 'Kotak Mahindra Bank', symbol: 'KOTAKBANK.NS' },
+            'CIPLA': { name: 'Cipla', symbol: 'CIPLA.NS' },
+            'LT': { name: 'Larsen & Toubro', symbol: 'LT.NS' },
+            'AXISBANK': { name: 'Axis Bank', symbol: 'AXISBANK.NS' }
         };
 
-        // FII/DII DATA
-        const fiiDiiData = [
-            { name: 'FII (Foreign Institutional)', abbr: 'FII', trend: 'INCREASING', netFlow: '+₹2,450 Cr', change: '+3.2%',
-              topSectors: ['IT Services', 'Pharma', 'Capital Goods'], topStocks: ['TCS', 'INFY', 'CIPLA', 'LT'] },
-            { name: 'DII (Domestic Institutional)', abbr: 'DII', trend: 'INCREASING', netFlow: '+₹1,850 Cr', change: '+2.8%',
-              topSectors: ['Private Banking', 'Capital Goods', 'Defence'], topStocks: ['KOTAKBANK', 'LT', 'AXISBANK'] },
-            { name: 'Retail Investors', abbr: 'RETAIL', trend: 'DECREASING', netFlow: '-₹320 Cr', change: '-1.5%',
-              topSectors: ['Telecom', 'IT Services'], topStocks: ['JIOPLATFORMS', 'WIPRO', 'VODAFONE'] }
-        ];
+        const globalStocks = {
+            'AAPL': { name: 'Apple', symbol: 'AAPL' },
+            'GOOGL': { name: 'Google', symbol: 'GOOGL' },
+            'MSFT': { name: 'Microsoft', symbol: 'MSFT' }
+        };
 
-        // DAY TRADING DATA
-        const dayTradingSignals = [
-            { stock: 'TCS', abbr: 'TCS', category: 'IT Services', buyPrice: 4235.50, previousClose: 4210.00, gap: '+0.61%', target: 4290.00, stopLoss: 4175.00, riskReward: '1:2.1', confidence: '92%', sentiment: 'BULLISH', recommendation: 'BUY' },
-            { stock: 'KOTAKBANK', abbr: 'KOTAKBANK', category: 'Private Banking', buyPrice: 492.75, previousClose: 490.25, gap: '+0.51%', target: 510.00, stopLoss: 475.00, riskReward: '1:1.9', confidence: '88%', sentiment: 'BULLISH', recommendation: 'BUY' },
-            { stock: 'CIPLA', abbr: 'CIPLA', category: 'Pharmaceuticals', buyPrice: 1298.50, previousClose: 1285.65, gap: '+1.00%', target: 1340.00, stopLoss: 1260.00, riskReward: '1:2.3', confidence: '90%', sentiment: 'BULLISH', recommendation: 'BUY' },
-            { stock: 'LT', abbr: 'LT', category: 'Capital Goods', buyPrice: 3465.00, previousClose: 3450.50, gap: '+0.42%', target: 3550.00, stopLoss: 3380.00, riskReward: '1:2.5', confidence: '95%', sentiment: 'STRONGLY BULLISH', recommendation: 'BUY' }
-        ];
+        const indices = {
+            '^NSEI': { name: 'Nifty 50', symbol: '^NSEI' },
+            '^BSESN': { name: 'Sensex', symbol: '^BSESN' },
+            '^GSPC': { name: 'S&P 500', symbol: '^GSPC' }
+        };
 
-        function createCard(asset, onclick = null) {
-            const changeColor = asset.change > 0 ? 'text-green' : 'text-red';
-            const changeSymbol = asset.change > 0 ? '▲' : '▼';
-            const click = onclick ? `onclick="${onclick}"` : '';
-            return `<div class="card" ${click} style="cursor: ${onclick ? 'pointer' : 'default'};"><div class="card-title">${asset.name}</div><div class="card-meta">📌 ${asset.abbr}${asset.country ? ' • ' + asset.country : ''}</div><div class="card-value">${typeof asset.value === 'number' ? (asset.value > 100 ? asset.value.toFixed(2) : asset.value.toFixed(4)) : asset.value}</div><div class="card-change ${changeColor}">${changeSymbol} ${Math.abs(asset.change).toFixed(2)}%</div>${asset.pe ? `<span class="badge">P/E: ${asset.pe}x</span>` : ''}${asset.recommendation ? `<span class="badge badge-${asset.recommendation === 'BUY' ? 'green' : 'red'}">${asset.recommendation}</span>` : ''}</div>`;
+        // Fetch live data from Finnhub
+        async function fetchStockData(symbol) {
+            try {
+                const response = await fetch(`${FINNHUB_BASE_URL}/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching data for', symbol, error);
+                return null;
+            }
         }
 
-        function openSectorModal(sector) {
-            document.getElementById('modalTitle').textContent = `${sector.name} - Companies`;
-            document.getElementById('modalBody').innerHTML = `<div class="stocks-grid">${sector.stocks.map(s => `<div class="stock-item"><div class="stock-abbr">${s.abbr}</div><div class="stock-name">${s.name}</div><div class="stock-info"><div class="stock-info-item"><span>Price:</span><span style="color: #10b981;">₹${s.price.toFixed(2)}</span></div><div class="stock-info-item"><span>Change:</span><span class="${s.change > 0 ? 'text-green' : 'text-red'};">${s.change > 0 ? '▲' : '▼'} ${Math.abs(s.change).toFixed(2)}%</span></div></div></div>`).join('')}</div>`;
-            document.getElementById('detailsModal').style.display = 'block';
+        // Create card HTML
+        function createCard(name, symbol, price, change, changePercent) {
+            const changeColor = changePercent >= 0 ? 'text-green' : 'text-red';
+            const changeSymbol = changePercent >= 0 ? '▲' : '▼';
+
+            return `
+                <div class="card">
+                    <div class="card-title">${name}</div>
+                    <div class="card-meta">📌 ${symbol}</div>
+                    <div class="card-value">₹${price ? price.toFixed(2) : 'N/A'}</div>
+                    <div class="card-change ${changeColor}">${changeSymbol} ${changePercent ? Math.abs(changePercent).toFixed(2) : '0.00'}%</div>
+                    <span class="badge badge-green">LIVE</span>
+                </div>
+            `;
         }
 
-        function createFiiDiiCard(data) {
-            const isPositive = data.trend === 'INCREASING';
-            const trendColor = isPositive ? 'text-green' : 'text-red';
-            const trendSymbol = isPositive ? '▲' : '▼';
-            return `<div class="card fii-card${!isPositive ? ' negative' : ''}"><div class="card-title">${data.name}</div><div class="card-value ${trendColor}">${trendSymbol} ${data.netFlow}</div><div class="card-change ${trendColor}">${trendSymbol} ${data.change}</div><div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);"><div style="font-size: 0.9em; color: #94a3b8; margin-bottom: 8px;">Top Sectors:</div>${data.topSectors.map(s => `<span class="badge badge-green">${s}</span>`).join('')}</div></div>`;
+        // Fetch and display Indian stocks
+        async function displayIndianStocks() {
+            const container = document.getElementById('indianStocks');
+            const loading = document.getElementById('loading1');
+
+            container.innerHTML = '';
+            loading.style.display = 'block';
+
+            for (const [key, stock] of Object.entries(indianStocks)) {
+                const data = await fetchStockData(stock.symbol);
+                if (data && data.c) {
+                    const html = createCard(stock.name, key, data.c, data.d, data.dp);
+                    container.innerHTML += html;
+                } else {
+                    container.innerHTML += `<div class="card"><div class="card-title">${stock.name}</div><div class="card-meta">Error loading data</div></div>`;
+                }
+            }
+            loading.style.display = 'none';
         }
 
-        function createDayTradingCard(data) {
-            const profitAmount = ((data.target - data.buyPrice) / data.buyPrice * 100).toFixed(2);
-            return `<div class="card day-trade-card"><div class="card-title">${data.stock}</div><div class="card-meta">📌 ${data.abbr} • ${data.category}</div><div style="margin: 15px 0; padding: 12px; background: rgba(10, 10, 10, 0.8); border-radius: 6px;"><div class="stats-row"><span class="stats-label">Buy:</span><span class="stats-value text-blue">₹${data.buyPrice}</span></div><div class="stats-row"><span class="stats-label">Target:</span><span class="stats-value text-green">₹${data.target}</span></div><div class="stats-row"><span class="stats-label">Risk:Reward:</span><span class="stats-value">${data.riskReward}</span></div></div><span class="badge badge-green">${data.recommendation}</span><span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #93c5fd;">Confidence: ${data.confidence}</span></div>`;
+        // Fetch and display global markets
+        async function displayGlobalMarkets() {
+            const container = document.getElementById('globalMarkets');
+            const loading = document.getElementById('loading2');
+
+            container.innerHTML = '';
+            loading.style.display = 'block';
+
+            for (const [key, stock] of Object.entries(globalStocks)) {
+                const data = await fetchStockData(stock.symbol);
+                if (data && data.c) {
+                    const html = createCard(stock.name, key, data.c, data.d, data.dp);
+                    container.innerHTML += html;
+                }
+            }
+            loading.style.display = 'none';
         }
 
-        function closeModal() { document.getElementById('detailsModal').style.display = 'none'; }
+        // Fetch and display indices
+        async function displayIndices() {
+            const container = document.getElementById('indices');
+            const loading = document.getElementById('loading3');
 
-        function refreshDashboard() {
+            container.innerHTML = '';
+            loading.style.display = 'block';
+
+            for (const [key, stock] of Object.entries(indices)) {
+                const data = await fetchStockData(stock.symbol);
+                if (data && data.c) {
+                    const html = createCard(stock.name, key, data.c, data.d, data.dp);
+                    container.innerHTML += html;
+                }
+            }
+            loading.style.display = 'none';
+        }
+
+        // Main fetch function
+        async function fetchLiveData() {
             const btn = document.getElementById('refreshBtn');
             const icon = document.getElementById('refreshIcon');
+
             btn.disabled = true;
             icon.classList.add('spinning');
-            btn.style.opacity = '0.7';
+
+            await displayIndianStocks();
+            await displayGlobalMarkets();
+            await displayIndices();
+
+            btn.disabled = false;
+            icon.classList.remove('spinning');
+
+            // Show confirmation
+            btn.innerHTML = '<span>✓ Updated</span>';
             setTimeout(() => {
-                document.getElementById('indianTiles').innerHTML = marketData.indianIndices.map(a => createCard(a)).join('');
-                document.getElementById('globalTiles').innerHTML = marketData.globalIndices.map(a => createCard(a)).join('');
-                document.getElementById('sectorTiles').innerHTML = marketData.sectors.map(a => createCard(a)).join('');
-                document.getElementById('liveMarkets').innerHTML = [...marketData.indianIndices, ...marketData.sectors, ...marketData.globalIndices].map(a => createCard(a)).join('');
-                document.getElementById('advisorCards').innerHTML = marketData.sectors.map(a => createCard(a, `openSectorModal({name:'${a.name}', abbr:'${a.abbr}', stocks:${JSON.stringify(a.stocks)}})`)).join('');
-                document.getElementById('sectorCards').innerHTML = marketData.sectors.map(a => `<div class="card" onclick="openSectorModal({name:'${a.name}', abbr:'${a.abbr}', stocks:${JSON.stringify(a.stocks)}})"><div class="card-title">${a.name}</div><div class="card-meta">📌 ${a.abbr}</div><div class="card-value">${a.value.toFixed(1)}</div><div class="card-change text-green">▲ ${a.change.toFixed(2)}%</div><span class="badge badge-green">${a.recommendation}</span></div>`).join('');
-                document.getElementById('fiiDiiTiles').innerHTML = fiiDiiData.map(d => createFiiDiiCard(d)).join('');
-                document.getElementById('dayTradingTiles').innerHTML = dayTradingSignals.map(d => createDayTradingCard(d)).join('');
-                btn.disabled = false;
-                icon.classList.remove('spinning');
-                btn.style.opacity = '1';
-                btn.innerHTML = '<span>✓ Refreshed</span>';
-                setTimeout(() => { btn.innerHTML = '<span id="refreshIcon">🔄</span><span>Refresh</span>'; }, 2000);
-            }, 800);
+                btn.innerHTML = '<span id="refreshIcon">🔄</span><span>Refresh Now</span>';
+            }, 2000);
         }
 
+        // Switch tabs
         function switchTab(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
@@ -375,20 +286,13 @@
             event.target.classList.add('active');
         }
 
-        window.onclick = function(e) {
-            const modal = document.getElementById('detailsModal');
-            if (e.target === modal) modal.style.display = 'none';
-        }
+        // Auto-fetch every 5 minutes
+        setInterval(fetchLiveData, 5 * 60 * 1000);
 
-        // RENDER ALL VIEWS
-        document.getElementById('indianTiles').innerHTML = marketData.indianIndices.map(a => createCard(a)).join('');
-        document.getElementById('globalTiles').innerHTML = marketData.globalIndices.map(a => createCard(a)).join('');
-        document.getElementById('sectorTiles').innerHTML = marketData.sectors.map(a => createCard(a)).join('');
-        document.getElementById('liveMarkets').innerHTML = [...marketData.indianIndices, ...marketData.sectors, ...marketData.globalIndices].map(a => createCard(a)).join('');
-        document.getElementById('advisorCards').innerHTML = marketData.sectors.map(a => createCard(a, `openSectorModal({name:'${a.name}', abbr:'${a.abbr}', stocks:${JSON.stringify(a.stocks)}})`)).join('');
-        document.getElementById('sectorCards').innerHTML = marketData.sectors.map(a => `<div class="card" onclick="openSectorModal({name:'${a.name}', abbr:'${a.abbr}', stocks:${JSON.stringify(a.stocks)}})"><div class="card-title">${a.name}</div><div class="card-meta">📌 ${a.abbr}</div><div class="card-value">${a.value.toFixed(1)}</div><div class="card-change text-green">▲ ${a.change.toFixed(2)}%</div><span class="badge badge-green">${a.recommendation}</span></div>`).join('');
-        document.getElementById('fiiDiiTiles').innerHTML = fiiDiiData.map(d => createFiiDiiCard(d)).join('');
-        document.getElementById('dayTradingTiles').innerHTML = dayTradingSignals.map(d => createDayTradingCard(d)).join('');
+        // Initial load
+        window.addEventListener('load', () => {
+            fetchLiveData();
+        });
     </script>
 </body>
 </html>
